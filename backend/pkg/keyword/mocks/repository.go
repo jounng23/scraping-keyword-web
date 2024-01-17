@@ -35,19 +35,34 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
-// CreateKeywordResults mocks base method.
-func (m *MockRepository) CreateKeywordResults(c context.Context, keywords []string) ([]db.KeywordResult, error) {
+// CrawlKeywordResults mocks base method.
+func (m *MockRepository) CrawlKeywordResults(keywords []string) ([]db.KeywordResult, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateKeywordResults", c, keywords)
+	ret := m.ctrl.Call(m, "CrawlKeywordResults", keywords)
+	ret0, _ := ret[0].([]db.KeywordResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CrawlKeywordResults indicates an expected call of CrawlKeywordResults.
+func (mr *MockRepositoryMockRecorder) CrawlKeywordResults(keywords interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CrawlKeywordResults", reflect.TypeOf((*MockRepository)(nil).CrawlKeywordResults), keywords)
+}
+
+// CreateKeywordResults mocks base method.
+func (m *MockRepository) CreateKeywordResults(c context.Context, keywordResults []db.KeywordResult) ([]db.KeywordResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateKeywordResults", c, keywordResults)
 	ret0, _ := ret[0].([]db.KeywordResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateKeywordResults indicates an expected call of CreateKeywordResults.
-func (mr *MockRepositoryMockRecorder) CreateKeywordResults(c, keywords interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) CreateKeywordResults(c, keywordResults interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateKeywordResults", reflect.TypeOf((*MockRepository)(nil).CreateKeywordResults), c, keywords)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateKeywordResults", reflect.TypeOf((*MockRepository)(nil).CreateKeywordResults), c, keywordResults)
 }
 
 // GetKeywordResultByKeywords mocks base method.

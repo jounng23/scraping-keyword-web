@@ -20,7 +20,10 @@ type DBCfg struct {
 }
 
 type ServerCfg struct {
-	APIPort int `envconfig:"API_PORT" default:"8000"`
+	Host         string `envconfig:"HOST" default:"http://localhost"`
+	APIPort      int    `envconfig:"API_PORT" default:"8000"`
+	JWTSecretKey string `envconfig:"JWT_SECRET_KEY" default:"@secret1234"`
+	WebAppPort   int    `envconfig:"WEB_APP_PORT" default:"3030"`
 }
 
 func InitConfig(configFile string) {

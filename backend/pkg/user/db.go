@@ -12,7 +12,7 @@ var ErrNotFound = errors.New("user not found")
 
 type Storage interface {
 	GetUserByID(c context.Context, ID string) (user db.User, err error)
-	GetUserByAuthentication(c context.Context, username, hashedPassword string) (db.User, error)
+	GetUserByUsername(c context.Context, username string) (db.User, error)
 	CreateUser(c context.Context, user db.User) (db.User, error)
 }
 
@@ -24,12 +24,16 @@ func NewStorage(db *gorm.DB) Storage {
 	return &storage{db}
 }
 
-func (s *storage) GetUserByAuthentication(c context.Context, username, hashedPassword string) (user db.User, err error) {
+func (s *storage) GetUserByUsername(c context.Context, username string) (user db.User, err error) {
 	var users []db.User
-	res := s.db.Select("user_id", "created_at").
-		Where("username = ? AND password = ?", username, hashedPassword).
-		Find(&users)
+	res := s.db.Where("username = ?", username).Find(&users)
 	if res.Error != nil {
+		err = res.Error
+		return
+	}
+
+	if len(users) == 0 {
+		err = ErrNotFound
 		return
 	}
 	user = users[0]
@@ -42,6 +46,12 @@ func (s *storage) GetUserByID(c context.Context, ID string) (user db.User, err e
 		Where("user_id = ?", ID).
 		Find(&users)
 	if res.Error != nil {
+		err = res.Error
+		return
+	}
+
+	if len(users) == 0 {
+		err = ErrNotFound
 		return
 	}
 	user = users[0]

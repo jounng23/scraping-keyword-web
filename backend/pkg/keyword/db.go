@@ -10,6 +10,7 @@ import (
 type Storage interface {
 	CreateKeywordResults(c context.Context, keywordResults []*db.KeywordResult) error
 	GetKeywordResultByKeywords(c context.Context, keywords []string) (keywordResults []db.KeywordResult, err error)
+	GetKeywordResultByIDs(c context.Context, ids []string) (keywordResults []db.KeywordResult, err error)
 }
 
 type storage struct {

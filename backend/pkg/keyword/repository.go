@@ -13,8 +13,9 @@ import (
 
 //go:generate mockgen -source=$GOFILE -package=keyword_mocks -destination=$PWD/mocks/${GOFILE}
 type Repository interface {
-	GetKeywordResultByKeywords(c context.Context, keywords []string) (keywordResults []db.KeywordResult, err error)
-	CreateKeywordResults(c context.Context, keywordResults []db.KeywordResult) (newKeywordResults []db.KeywordResult, err error)
+	GetKeywordResultByIDs(c context.Context, ids []string) ([]db.KeywordResult, error)
+	GetKeywordResultByKeywords(c context.Context, keywords []string) ([]db.KeywordResult, error)
+	CreateKeywordResults(c context.Context, keywordResults []db.KeywordResult) ([]db.KeywordResult, error)
 	CrawlKeywordResults(keywords []string) ([]db.KeywordResult, error)
 }
 
@@ -95,9 +96,10 @@ func (repo *repo) CrawlKeywordResults(keywords []string) ([]db.KeywordResult, er
 func (r *repo) CreateKeywordResults(c context.Context, keywordInfos []db.KeywordResult) (newKeywordResults []db.KeywordResult, err error) {
 	keywordResults := make([]*db.KeywordResult, 0, len(keywordInfos))
 	for _, k := range keywordInfos {
-		k.KeywordID = strutil.GenerateUUID()
-		k.CreatedAt = time.Now()
-		keywordResults = append(keywordResults, &k)
+		kwRes := k
+		kwRes.KeywordID = strutil.GenerateUUID()
+		kwRes.CreatedAt = time.Now()
+		keywordResults = append(keywordResults, &kwRes)
 	}
 
 	err = r.dbStorage.CreateKeywordResults(c, keywordResults)
@@ -112,6 +114,10 @@ func (r *repo) CreateKeywordResults(c context.Context, keywordInfos []db.Keyword
 	return
 }
 
-func (r *repo) GetKeywordResultByKeywords(c context.Context, keywords []string) (keywordResults []db.KeywordResult, err error) {
+func (r *repo) GetKeywordResultByKeywords(c context.Context, keywords []string) ([]db.KeywordResult, error) {
 	return r.dbStorage.GetKeywordResultByKeywords(c, keywords)
+}
+
+func (r *repo) GetKeywordResultByIDs(c context.Context, ids []string) ([]db.KeywordResult, error) {
+	return r.dbStorage.GetKeywordResultByIDs(c, ids)
 }

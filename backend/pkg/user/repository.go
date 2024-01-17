@@ -9,7 +9,7 @@ import (
 
 //go:generate mockgen -source=$GOFILE -package=user_mocks -destination=$PWD/mocks/${GOFILE}
 type Repository interface {
-	GetUserByAuthentication(c context.Context, username, hashedPassword string) (db.User, error)
+	GetUserByUsername(c context.Context, username string) (db.User, error)
 	CreateUser(c context.Context, user db.User) (db.User, error)
 }
 
@@ -17,13 +17,11 @@ type repo struct {
 	dbStorage Storage
 }
 
-func (r *repo) GetUserByAuthentication(c context.Context, username, hashedPassword string) (user db.User, err error) {
-	user, err = r.dbStorage.GetUserByAuthentication(c, username, hashedPassword)
+func (r *repo) GetUserByUsername(c context.Context, username string) (user db.User, err error) {
+	user, err = r.dbStorage.GetUserByUsername(c, username)
 	if err != nil {
 		return
 	}
-
-	user.Password = ""
 	return
 }
 
