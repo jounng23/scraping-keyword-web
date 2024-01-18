@@ -27,7 +27,7 @@ func (r *router) getKeywords(c *gin.Context) {
 		return
 	}
 
-	userKeywords, err := r.userkeywordRepo.GetUserKeywordByUserID(ctx, claims.UserID, limit, offset, sort)
+	userKeywords, total, err := r.userkeywordRepo.GetUserKeywordByUserID(ctx, claims.UserID, limit, offset, sort)
 	if err != nil {
 		log.Error().Msgf("failed to collect user keywords due to %v", err.Error())
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -45,7 +45,10 @@ func (r *router) getKeywords(c *gin.Context) {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	c.JSON(http.StatusOK, keywords)
+	c.JSON(http.StatusOK, GetKeywordsResponse{
+		KeywordResults: keywords,
+		Metadata:       GetKeywordsResponseMetaData{Total: total},
+	})
 }
 
 func (r *router) uploadKeywordFile(c *gin.Context) {

@@ -9,7 +9,7 @@ import (
 
 type Storage interface {
 	CreateMultipleUserKeywordByUserID(c context.Context, newUserKeywor []*db.UserKeyword) error
-	GetUserKeywordByUserID(c context.Context, userID string, limit, offset int, sort string) ([]db.UserKeyword, error)
+	GetUserKeywordByUserID(c context.Context, userID string, limit, offset int, sort string) ([]db.UserKeyword, int64, error)
 }
 
 type storage struct {
@@ -20,12 +20,13 @@ func NewStorage(db *gorm.DB) Storage {
 	return &storage{db}
 }
 
-func (s *storage) GetUserKeywordByUserID(c context.Context, userID string, limit, offset int, sort string) (userKeywords []db.UserKeyword, err error) {
+func (s *storage) GetUserKeywordByUserID(c context.Context, userID string, limit, offset int, sort string) (userKeywords []db.UserKeyword, total int64, err error) {
 	res := s.db.Where("user_id = ?", userID).
 		Limit(limit).
 		Offset(offset).
 		Order(sort).
-		Find(&userKeywords)
+		Find(&userKeywords).
+		Count(&total)
 	if res.Error != nil {
 		return
 	}

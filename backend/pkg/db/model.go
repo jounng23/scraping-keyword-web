@@ -28,7 +28,7 @@ type KeywordResult struct {
 	Keyword           string        `gorm:"index;unique;not null" json:"keyword"`
 	AdwordTotal       int           `json:"adword_total"`
 	LinkTotal         int           `json:"link_total"`
-	SearchResultTotal string        `json:"search_result_total"`
+	SearchResultTotal int           `json:"search_result_total"`
 	HtmlContent       string        `json:"html_content"`
 	CreatedAt         time.Time     `json:"created_at"`
 	UserKeyword       []UserKeyword `gorm:"foreignKey:keyword_id;references:keyword_id"`

@@ -4,9 +4,13 @@ import (
 	"context"
 	"scraping-keyword-web/backend/pkg/db"
 	strutil "scraping-keyword-web/backend/pkg/utils/strutils"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/PuerkitoBio/goquery"
+	"github.com/chromedp/cdproto/dom"
+	"github.com/chromedp/chromedp"
 	"github.com/gocolly/colly"
 	"golang.org/x/sync/errgroup"
 )
@@ -28,40 +32,48 @@ func NewRepository(db Storage, crawler *colly.Collector) Repository {
 	return &repo{dbStorage: db, crawler: crawler}
 }
 
-func (repo *repo) crawlKeywordResults(kw string) (result db.KeywordResult, err error) {
+func (repo *repo) crawlKeywordResult(kw string) (result db.KeywordResult, err error) {
 	result.Keyword = kw
 
-	// Visit the Google search page
-	repo.crawler.OnRequest(func(r *colly.Request) {
-		r.Headers.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
-	})
-
-	repo.crawler.OnHTML("html", func(e *colly.HTMLElement) {
-		// Extracting the total number of AdWords advertisers on the page
-		result.AdwordTotal = e.DOM.Find(".qvfQJe").Length()
-
-		// Extracting the total number of links on the page
-		result.LinkTotal = e.DOM.Find("a").Length()
-
-		// Extracting the total search results for this keyword
-		result.SearchResultTotal = e.DOM.Find("#result-stats").Text()
-
-	})
-
-	repo.crawler.OnResponse(func(r *colly.Response) {
-		result.HtmlContent = string(r.Body)
-	})
+	ctx, cancel := chromedp.NewContext(
+		context.Background(),
+	)
+	defer cancel()
 
 	url, _ := strutil.AddQueryParamsToRawUrl("https://www.google.com/search", map[string]string{
 		"q": kw,
 	})
-	err = repo.crawler.Visit(url)
+
+	var htmlContent string
+	err = chromedp.Run(ctx,
+		// visit the target page
+		chromedp.Navigate(url),
+		// wait for the page to load
+		chromedp.Sleep(2000*time.Millisecond),
+		// extract the raw HTML from the page
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			// select the root node on the page
+			rootNode, err := dom.GetDocument().Do(ctx)
+			if err != nil {
+				return err
+			}
+			htmlContent, err = dom.GetOuterHTML().WithNodeID(rootNode.NodeID).Do(ctx)
+			return err
+		}),
+	)
 	if err != nil {
 		return
 	}
 
-	// Start scraping
-	repo.crawler.Wait()
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(htmlContent))
+	if err != nil {
+		return
+	}
+
+	result.HtmlContent = htmlContent
+	result.AdwordTotal = doc.Find(".pla-unit").Length()
+	result.LinkTotal = doc.Find("a[href]").Length()
+	result.SearchResultTotal = strutil.CollectTotalSearchResultsFromStats(doc.Find("#result-stats").Text())
 	return
 }
 
@@ -73,7 +85,7 @@ func (repo *repo) CrawlKeywordResults(keywords []string) ([]db.KeywordResult, er
 	for _, kw := range keywords {
 		keyword := kw
 		wg.Go(func() error {
-			kwRes, err := repo.crawlKeywordResults(keyword)
+			kwRes, err := repo.crawlKeywordResult(keyword)
 			if err != nil {
 				return err
 			}

@@ -8,7 +8,7 @@ import (
 
 //go:generate mockgen -source=$GOFILE -package=userkeyword_mocks -destination=$PWD/mocks/${GOFILE}
 type Repository interface {
-	GetUserKeywordByUserID(c context.Context, userID string, limit, offset int, sort string) ([]db.UserKeyword, error)
+	GetUserKeywordByUserID(c context.Context, userID string, limit, offset int, sort string) ([]db.UserKeyword, int64, error)
 	CreateMultipleUserKeywordByUserID(c context.Context, userID string, keywordIDs []string) ([]db.UserKeyword, error)
 }
 
@@ -37,7 +37,7 @@ func (r *repo) CreateMultipleUserKeywordByUserID(c context.Context, userID strin
 	return
 }
 
-func (r *repo) GetUserKeywordByUserID(c context.Context, userID string, limit, offset int, sort string) (userKeywords []db.UserKeyword, err error) {
+func (r *repo) GetUserKeywordByUserID(c context.Context, userID string, limit, offset int, sort string) (userKeywords []db.UserKeyword, total int64, err error) {
 	return r.dbStorage.GetUserKeywordByUserID(c, userID, limit, offset, sort)
 }
 
