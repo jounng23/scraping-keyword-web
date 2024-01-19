@@ -4,6 +4,7 @@
 
 #nodejs
 node_modules
+dist
 
 #golang
 vendor
