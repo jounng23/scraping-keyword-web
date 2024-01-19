@@ -19,7 +19,7 @@
     "vite:build": "vite build",
     "install-api": "go mod tidy",
     "build-api": "go build",
-    "start-api": "go run ./backend/main.go"
+    "start-api": "docker-compose up -d && yarn install-api && go run ./backend/main.go"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
