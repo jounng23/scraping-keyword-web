@@ -11,9 +11,7 @@ yarn start-api
 
 2. Frontend (ReactJS)
 Start the Development Server: Use the following command to start the development server for the frontend application:
-npm start
-Running Both Backend and Frontend Together
+yarn start-web
 
-To run both the backend and frontend together, you can use the following command:
-docker-compose up -d && npm install && go run ./backend/main.go
+Running Both Backend and Frontend Together
 Feel free to reach out if you have any further questions or need additional assistance!
