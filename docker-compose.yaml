@@ -1,0 +1,15 @@
+version: "3.1"
+
+services:
+  postgresql:
+    image: postgres
+    container_name: postgres
+    environment:
+      POSTGRES_USER: chuongnd
+      POSTGRES_PASSWORD: 1234abcd
+      POSTGRES_DB: "scrapedb"
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
