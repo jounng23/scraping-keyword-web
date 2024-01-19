@@ -2,6 +2,9 @@
 
 .env
 
+#nodejs
+node_modules
+
 #golang
 vendor
 
